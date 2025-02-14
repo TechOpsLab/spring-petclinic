@@ -43,56 +43,120 @@ jobs:
           ./gradlew assemble
 
       - name: Run SAST Scan
-        run: ./endorctl scan --sast -o json | tee sast_results.json
+        id: sast
+        run: |
+          ./endorctl scan --sast -o json | tee sast_results.json > sast_output.txt 2>&1 || true
 
       - name: Run Secrets Scan
-        run: ./endorctl scan --secrets -o json | tee secrets_results.json
+        id: secrets
+        run: |
+          ./endorctl scan --secrets -o json | tee secrets_results.json > secrets_output.txt 2>&1 || true
 
       - name: Run Quick SCA Scan
-        run: ./endorctl scan --quick-scan -o json | tee sca_results.json
+        id: sca
+        run: |
+          ./endorctl scan --quick-scan -o json | tee sca_results.json > sca_output.txt 2>&1 || true
 
-      - name: Capture SAST Scan Results
-        id: sast_scan
-        run: echo "SAST_RESULT=$(jq -c . sast_results.json)" >> $GITHUB_ENV
-      
-      - name: Capture Secrets Scan Results
-        id: secrets_scan
-        run: echo "SECRETS_RESULT=$(jq -c . secrets_results.json)" >> $GITHUB_ENV
-      
-      - name: Capture SCA Quick Scan Results
-        id: sca_scan
-        run: echo "SCA_RESULT=$(jq -c . sca_results.json)" >> $GITHUB_ENV
-      
+      - name: Capture Scan Outputs
+        id: capture_results
+        run: |
+          echo "SAST_OUTPUT<<EOF" >> $GITHUB_ENV
+          cat sast_output.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "SECRETS_OUTPUT<<EOF" >> $GITHUB_ENV
+          cat secrets_output.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "SCA_OUTPUT<<EOF" >> $GITHUB_ENV
+          cat sca_output.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Comment Scan Results on PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             **Endorctl Scan Results:**
-      
+
             <details>
-            <summary>SAST Scan Results</summary>
-      
-            ```json
-            ${{ env.SAST_RESULT }}
+            <summary>SAST Scan Output</summary>
+
             ```
-      
+            ${{ env.SAST_OUTPUT }}
+            ```
+
             </details>
-      
+
             <details>
-            <summary>Secrets Scan Results</summary>
-      
-            ```json
-            ${{ env.SECRETS_RESULT }}
+            <summary>Secrets Scan Output</summary>
+
             ```
-      
+            ${{ env.SECRETS_OUTPUT }}
+            ```
+
             </details>
-      
+
             <details>
-            <summary>SCA Quick Scan Results</summary>
-      
-            ```json
-            ${{ env.SCA_RESULT }}
+            <summary>SCA Quick Scan Output</summary>
+
             ```
-      
+            ${{ env.SCA_OUTPUT }}
+            ```
+
             </details>
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Run SAST Scan
+      #   run: ./endorctl scan --sast -o json | tee sast_results.json
+
+      # - name: Run Secrets Scan
+      #   run: ./endorctl scan --secrets -o json | tee secrets_results.json
+
+      # - name: Run Quick SCA Scan
+      #   run: ./endorctl scan --quick-scan -o json | tee sca_results.json
+
+      # - name: Capture SAST Scan Results
+      #   id: sast_scan
+      #   run: echo "SAST_RESULT=$(jq -c . sast_results.json)" >> $GITHUB_ENV
+      
+      # - name: Capture Secrets Scan Results
+      #   id: secrets_scan
+      #   run: echo "SECRETS_RESULT=$(jq -c . secrets_results.json)" >> $GITHUB_ENV
+      
+      # - name: Capture SCA Quick Scan Results
+      #   id: sca_scan
+      #   run: echo "SCA_RESULT=$(jq -c . sca_results.json)" >> $GITHUB_ENV
+      
+      # - name: Comment Scan Results on PR
+      #   uses: thollander/actions-comment-pull-request@v2
+      #   with:
+      #     message: |
+      #       **Endorctl Scan Results:**
+      
+      #       <details>
+      #       <summary>SAST Scan Results</summary>
+      
+      #       ```json
+      #       ${{ env.SAST_RESULT }}
+      #       ```
+      
+      #       </details>
+      
+      #       <details>
+      #       <summary>Secrets Scan Results</summary>
+      
+      #       ```json
+      #       ${{ env.SECRETS_RESULT }}
+      #       ```
+      
+      #       </details>
+      
+      #       <details>
+      #       <summary>SCA Quick Scan Results</summary>
+      
+      #       ```json
+      #       ${{ env.SCA_RESULT }}
+      #       ```
+      
+      #       </details>
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
