@@ -46,19 +46,49 @@ jobs:
         id: sast
         run: |
           ./endorctl scan --sast -o json > sast_results.json 2> sast_errors.txt || true
-          cat sast_results.json > sast_output.txt || cat sast_errors.txt > sast_output.txt
-
+          if [ ! -s sast_results.json ]; then
+            cat sast_errors.txt > sast_output.txt
+          else
+            cat sast_results.json > sast_output.txt
+          fi
+      
       - name: Run Secrets Scan
         id: secrets
         run: |
           ./endorctl scan --secrets -o json > secrets_results.json 2> secrets_errors.txt || true
-          cat secrets_results.json > secrets_output.txt || cat secrets_errors.txt > secrets_output.txt
-
+          if [ ! -s secrets_results.json ]; then
+            cat secrets_errors.txt > secrets_output.txt
+          else
+            cat secrets_results.json > secrets_output.txt
+          fi
+      
       - name: Run Quick SCA Scan
         id: sca
         run: |
           ./endorctl scan --quick-scan -o json > sca_results.json 2> sca_errors.txt || true
-          cat sca_results.json > sca_output.txt || cat sca_errors.txt > sca_output.txt
+          if [ ! -s sca_results.json ]; then
+            cat sca_errors.txt > sca_output.txt
+          else
+            cat sca_results.json > sca_output.txt
+          fi
+
+      # - name: Run SAST Scan
+      #   id: sast
+      #   run: |
+      #     ./endorctl scan --sast -o json > sast_results.json 2> sast_errors.txt || true
+      #     cat sast_results.json > sast_output.txt || cat sast_errors.txt > sast_output.txt
+
+      # - name: Run Secrets Scan
+      #   id: secrets
+      #   run: |
+      #     ./endorctl scan --secrets -o json > secrets_results.json 2> secrets_errors.txt || true
+      #     cat secrets_results.json > secrets_output.txt || cat secrets_errors.txt > secrets_output.txt
+
+      # - name: Run Quick SCA Scan
+      #   id: sca
+      #   run: |
+      #     ./endorctl scan --quick-scan -o json > sca_results.json 2> sca_errors.txt || true
+      #     cat sca_results.json > sca_output.txt || cat sca_errors.txt > sca_output.txt
 
       - name: Capture Scan Outputs
         id: capture_results
