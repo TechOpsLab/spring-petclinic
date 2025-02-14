@@ -8,10 +8,19 @@ on:
 jobs:
   endorctl-scan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '17' ]
+
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{matrix.java}}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{matrix.java}}
+          distribution: 'adopt'
+          cache: maven
 
       - name: Setup Endorctl
         run: |
