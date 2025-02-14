@@ -45,17 +45,20 @@ jobs:
       - name: Run SAST Scan
         id: sast
         run: |
-          ./endorctl scan --sast -o json | tee sast_results.json > sast_output.txt 2>&1 || true
+          ./endorctl scan --sast -o json > sast_results.json 2> sast_errors.txt || true
+          cat sast_results.json > sast_output.txt || cat sast_errors.txt > sast_output.txt
 
       - name: Run Secrets Scan
         id: secrets
         run: |
-          ./endorctl scan --secrets -o json | tee secrets_results.json > secrets_output.txt 2>&1 || true
+          ./endorctl scan --secrets -o json > secrets_results.json 2> secrets_errors.txt || true
+          cat secrets_results.json > secrets_output.txt || cat secrets_errors.txt > secrets_output.txt
 
       - name: Run Quick SCA Scan
         id: sca
         run: |
-          ./endorctl scan --quick-scan -o json | tee sca_results.json > sca_output.txt 2>&1 || true
+          ./endorctl scan --quick-scan -o json > sca_results.json 2> sca_errors.txt || true
+          cat sca_results.json > sca_output.txt || cat sca_errors.txt > sca_output.txt
 
       - name: Capture Scan Outputs
         id: capture_results
@@ -105,7 +108,6 @@ jobs:
 
             </details>
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # - name: Run SAST Scan
       #   run: ./endorctl scan --sast -o json | tee sast_results.json
 
